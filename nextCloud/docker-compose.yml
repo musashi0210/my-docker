@@ -1,0 +1,46 @@
+version: "3.7"
+services:
+  nextcloud_main:
+    image: nextcloud
+    container_name: nextcloud_main
+    environment:
+      TZ: Asia/Tokyo
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      VIRTUAL_PORT: ${VIRTUAL_PORT}
+      LETSENCRYPT_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      LETSENCRYPT_TEST: ${LETSENCRYPT_TEST}
+    volumes:
+      - ./outputVolumes/nextcloud/data:/var/www/html/data
+      - ./outputVolumes/nextcloud/config:/var/www/html/config
+    networks:
+      - proxy-link
+      - nextcloud-link
+    # ports:
+    #   - 80:80
+    restart: unless-stopped
+
+  nextcloud_db:
+    image: mariadb
+    container_name: nextcloud_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./outputVolumes/mariadb/mysql:/var/lib/mysql
+    networks:
+      - nextcloud-link
+    restart: unless-stopped
+
+networks:
+  default:
+    name: bridge
+    external: true
+  proxy-link:
+    name: proxy.internal
+    external: true
+  nextcloud-link:
+    name: nextcloud.internal
+    external: false
