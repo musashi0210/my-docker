@@ -1,0 +1,24 @@
+version: "3"
+services:
+  wireguard:
+    image: linuxserver/wireguard
+    container_name: wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    environment:
+      - PUID=1000 # ホストのuid(「$ id」)
+      - PGID=1000 # ホストのgid(「$ id」)
+      - TZ=Asia/Tokyo # タイムゾーン
+      - SERVERURL=auto # ドメイン名
+      - SERVERPORT=51820 # ポート
+      - PEERS=5 # 接続できる端末数
+      - PEERDNS=auto
+      - INTERNAL_SUBNET=10.13.13.0 # VPNのネットワークアドレス
+      - ALLOWEDIPS=0.0.0.0/0 # 疎通を許可するネットワーク
+    volumes:
+      - ./config:/config
+      - /lib/modules:/lib/modules
+    ports:
+      - 51820:51820/udp
+    restart: unless-stopped
