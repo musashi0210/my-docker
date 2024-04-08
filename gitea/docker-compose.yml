@@ -1,0 +1,53 @@
+version: "3.7"
+services:
+  gitea_main:
+    image: gitea/gitea:latest
+    container_name: gitea_main
+    environment:
+      USER_UID: 1000
+      USER_GID: 1000
+      DB_TYPE: postgres
+      DB_HOST: gitea_db:5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWD: ${DB_PASSWORD}
+      ROOT_URL: https://${VIRTUAL_HOST}
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      VIRTUAL_PORT: ${VIRTUAL_PORT}
+      LETSENCRYPT_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      LETSENCRYPT_TEST: ${LETSENCRYPT_TEST}
+    volumes:
+      - ./outputVolumes/gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    networks:
+      - proxy-link
+      - gitea-link
+    depends_on:
+      - gitea_db
+    restart: unless-stopped
+
+  gitea_db:
+    image: postgres:9.6
+    container_name: gitea_db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./outputVolumes/postgres:/var/lib/postgresql/data
+    networks:
+      - gitea-link
+    restart: unless-stopped
+
+networks:
+  default:
+    name: bridge
+    external: true
+  proxy-link:
+    name: proxy.internal
+    external: true
+  gitea-link:
+    name: gitea.internal
+    external: false
