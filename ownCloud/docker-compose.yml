@@ -1,0 +1,46 @@
+version: "3.7"
+services:
+  owncloud_main:
+    image: owncloud
+    container_name: owncloud_main
+    environment:
+      TZ: Asia/Tokyo
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      VIRTUAL_PORT: ${VIRTUAL_PORT}
+      LETSENCRYPT_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      LETSENCRYPT_TEST: ${LETSENCRYPT_TEST}
+    volumes:
+      - ./outputVolumes/owncloud/data:/var/www/html/data
+      - ./outputVolumes/owncloud/config:/var/www/html/config
+    networks:
+      - proxy-link
+      - owncloud-link
+    # ports:
+    #   - 80:80
+    restart: unless-stopped
+
+  owncloud_db:
+    image: mariadb
+    container_name: owncloud_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./outputVolumes/mariadb/mysql:/var/lib/mysql
+    networks:
+      - owncloud-link
+    restart: unless-stopped
+
+networks:
+  default:
+    name: bridge
+    external: true
+  proxy-link:
+    name: proxy.internal
+    external: true
+  owncloud-link:
+    name: owncloud.internal
+    external: false
