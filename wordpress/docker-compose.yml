@@ -1,0 +1,65 @@
+version: "3.7"
+services:
+  wordpress_main:
+    build: ./Dockerfiles/wordpress
+    container_name: wordpress_main
+    environment:
+      TZ: Asia/Tokyo
+      WORDPRESS_DB_HOST: wordpress_db
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./shareVolumes/html:/var/www/html
+    networks:
+      - wordpress-link
+    depends_on:
+      - wordpress_db
+    restart: unless-stopped
+
+  wordpress_db:
+    image: mariadb
+    container_name: wordpress_db
+    environment:
+      TZ: Asia/Tokyo
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./outputVolumes/mariadb/mysql:/var/lib/mysql
+    networks:
+      - wordpress-link
+    restart: unless-stopped
+
+  wordpress_web:
+    image: nginx
+    container_name: wordpress_web
+    environment:
+      TZ: Asia/Tokyo
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      VIRTUAL_PORT: ${VIRTUAL_PORT}
+      LETSENCRYPT_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      LETSENCRYPT_TEST: ${LETSENCRYPT_TEST}
+    volumes:
+      - ./inputVolumes/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./inputVolumes/nginx/conf.d:/etc/nginx/conf.d
+      - ./shareVolumes/html:/var/www/html
+    networks:
+      - proxy-link
+      - wordpress-link
+    depends_on:
+      - wordpress_main
+    restart: unless-stopped
+
+networks:
+  default:
+    name: bridge
+    external: true
+  proxy-link:
+    name: proxy.internal
+    external: true
+  wordpress-link:
+    name: wordpress.internal
+    external: false
