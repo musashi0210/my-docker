@@ -1,0 +1,11 @@
+version: "3.7"
+services:
+  ffmpeg:
+    build: ./
+    container_name: ffmpeg
+    volumes:
+      - ./bash:/work/bash
+      - ./input:/work/input
+      - ./output:/work/output
+    command: bash ./bash/mp4_to_gif.bash
+    # command: bash ./bash/vob_to_mp4.bash
