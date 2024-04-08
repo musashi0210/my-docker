@@ -1,0 +1,8 @@
+version: "3"
+services:
+  youtube-dl:
+    build: ./
+    container_name: youtube-dl
+    volumes:
+      - ./media:/media
+    command: bash ./excute_youtube-dl.bash
