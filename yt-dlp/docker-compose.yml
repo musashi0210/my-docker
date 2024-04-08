@@ -1,0 +1,8 @@
+version: "3.7"
+services:
+  yt-dlp:
+    build: ./
+    container_name: yt-dlp
+    volumes:
+      - ./media:/media
+    command: bash ./excute_yt-dlp.bash
