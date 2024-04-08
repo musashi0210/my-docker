@@ -1,0 +1,57 @@
+version: "3.7"
+
+services:
+  proxy:
+    image: jwilder/nginx-proxy
+    container_name: proxy
+    environment:
+      TZ: Asia/Tokyo
+      DEFAULT_HOST: ${PROXY_DEFAULT_HOST}
+      DHPARAM_GENERATION: "false"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./inputVolumes/nginx/conf.d/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf # ファイルのuploadサイズ制限を書き換える
+      - ./inputVolumes/nginx/htpasswd:/etc/nginx/htpasswd # ベーシック認証($ htpasswd -c パスワードファイル名 ユーザー名)
+      - ./outputVolumes/nginx/certs:/etc/nginx/certs:ro
+      - ./outputVolumes/nginx/vhost.d:/etc/nginx/vhost.d
+      - ./outputVolumes/nginx/log:/var/log/nginx
+      - proxy-dhparam:/etc/nginx/dhparam
+      - proxy-html:/usr/share/nginx/html
+    networks:
+      - proxy-link
+    ports:
+      - 80:80
+      - 443:443
+    restart: always
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt
+    environment:
+      TZ: Asia/Tokyo
+      NGINX_PROXY_CONTAINER: proxy
+      DEFAULT_EMAIL: ${LETSENCRYPT_EMAIL}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./outputVolumes/nginx/certs:/etc/nginx/certs
+      - ./outputVolumes/nginx/vhost.d:/etc/nginx/vhost.d
+      - proxy-acme:/etc/acme.sh
+      - proxy-html:/usr/share/nginx/html
+    networks:
+      - proxy-link
+    depends_on:
+      - proxy
+    restart: always
+
+networks:
+  default:
+    name: bridge
+    external: true
+  proxy-link:
+    name: proxy.internal
+    external: false
+
+volumes:
+  proxy-dhparam:
+  proxy-html:
+  proxy-acme:
