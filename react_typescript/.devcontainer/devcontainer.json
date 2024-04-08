@@ -1,0 +1,35 @@
+{
+  "name": "react_typescript",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces",
+  "remoteUser": "root",
+  "forwardPorts": [
+    3000
+  ],
+  "shutdownAction": "stopCompose",
+  "features": {
+    "git": "latest",
+    "aws-cli": "latest",
+    "ghcr.io/shyim/devcontainers-features/bun:0": {}
+  },
+  "customizations": {
+    "vscode": {
+      // vsCodeの設定
+      // "settings": {
+      //   "workbench.colorTheme": "Default Dark Modern"
+      // },
+      // 拡張機能リスト(拡張機能IDを指定)
+      "extensions": [
+        "MS-CEINTL.vscode-language-pack-ja",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "mhutchie.git-graph",
+        "eamodio.gitlens"
+        // "GitHub.copilot",
+        // "streetsidesoftware.code-spell-checker",
+        // "GitHub.vscode-pull-request-github"
+      ]
+    }
+  }
+}
