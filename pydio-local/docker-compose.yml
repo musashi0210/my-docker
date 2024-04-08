@@ -1,0 +1,27 @@
+version: "3.7"
+services:
+  pydio_main:
+    image: pydio/cells:latest
+    container_name: pydio_main
+    volumes:
+      - ./outputVolumes/pydio/cells:/var/cells
+    ports: ["8080:8080"]
+    restart: unless-stopped
+
+  pydio_db:
+    image: mysql:5.7
+    container_name: pydio_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./outputVolumes/mysql/mysql:/var/lib/mysql
+    command:
+      [
+        mysqld,
+        --character-set-server=utf8mb4,
+        --collation-server=utf8mb4_unicode_ci,
+      ]
+    restart: unless-stopped

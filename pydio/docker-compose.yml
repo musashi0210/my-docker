@@ -1,0 +1,61 @@
+version: "3.7"
+services:
+  pydio_main:
+    # image: pydio/cells:1.6.1
+    image: pydio/cells:1.5.3
+    container_name: pydio_main
+    environment:
+      CELLS_BIND: 0.0.0.0:8000
+      CELLS_EXTERNAL: pydio.home.bitachoco.mydns.jp:8000
+      CELLS_NO_SSL: 1
+      VIRTUAL_HOST: ${VIRTUAL_HOST}
+      VIRTUAL_PORT: ${VIRTUAL_PORT}
+      LETSENCRYPT_HOST: ${VIRTUAL_HOST}
+      LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+      LETSENCRYPT_TEST: ${LETSENCRYPT_TEST}
+    volumes:
+      - ./outputVolumes/cells:/root/.config/pydio/cells
+      - "pydio_mysql_socket:/var/run/mysqld/"
+    networks:
+      - proxy-link
+      - pydio-link
+    expose:
+      - "8000"
+    depends_on:
+      - pydio_db
+    restart: unless-stopped
+
+  pydio_db:
+    image: mariadb
+    container_name: pydio_db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./outputVolumes/mariadb/mysql:/var/lib/mysql
+      - pydio_mysql_socket:/var/run/mysqld/
+    command:
+      [
+        mysqld,
+        --character-set-server=utf8mb4,
+        --collation-server=utf8mb4_unicode_ci,
+      ]
+    networks:
+      - pydio-link
+    restart: unless-stopped
+
+volumes:
+  pydio_mysql_socket:
+
+networks:
+  default:
+    name: bridge
+    external: true
+  proxy-link:
+    name: proxy.internal
+    external: true
+  pydio-link:
+    name: pydio.internal
+    external: false
